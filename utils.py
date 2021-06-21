@@ -42,6 +42,8 @@ except ImportError:
     pass
 
 
+
+
 def pprint(l, indent=0):
     if isinstance(l, list) or isinstance(l, tuple) or isinstance(l, set):
         for ll in l:
@@ -231,6 +233,29 @@ def margins_begone():
       </style>"""))
 
 
+def to_one_hot(lst):
+    values = dict()
+    ind = 0
+    for item in lst:
+        if item not in values.keys():
+            ind += 1
+            values[item] = ind
+    result = np.zeros((len(lst), ind+1))
+    for i, item in enumerate(lst):
+        result[i][values[item]]=1
+    return result, values
+
+
+def normalize(lst):
+    r = np.array(lst)
+    return (r - r.min()) / (r.max() - r.min()), (r.min(), r.max())
+
+
+def denormalize(lst, mi, ma):
+    r = np.array(lst)
+    return r*(ma-mi)+mi
+
+
 def imdisp(arr, rotate=False, zoom=(4, 4), palette=None):
     if isinstance(arr, torch.Tensor):
         arr = arr.detach().numpy()
@@ -327,3 +352,30 @@ def imrow(imglist, palette=None, zoom=(4,4)):
         fig.add_subplot(1, len(imglist), x+1)
         matplotlib.pyplot.imshow(img)
         matplotlib.pyplot.axis('off')
+
+
+class JsonUnrolled:
+    def __init__(self):
+        self.items = list()
+        pass
+
+    def __repr__(self):
+        return repr(self.items)
+
+
+def to_obj(d):
+    if type(d) is dict:
+        o = JsonUnrolled()
+        for k, v in d.items():
+            setattr(o, k, to_obj(v))
+            o.items.append(k)
+        return o
+    elif type(d) is list:
+        o = list()
+        for dd in d:
+            o.append(to_obj(dd))
+        return o
+    else:
+        return d
+
+
