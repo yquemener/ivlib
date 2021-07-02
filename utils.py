@@ -8,14 +8,11 @@ git_header()
 margins_begone()
 
 """
-
-
-
-
+import datetime
 import functools
 import os
 import time
-from copy import copy
+from copy import copy as specially_imported_copy
 from types import FunctionType
 import random
 # import tensorflow as tf
@@ -42,6 +39,8 @@ except ImportError:
     pass
 
 
+def timestamp():
+    return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
 def pprint(l, indent=0):
@@ -108,7 +107,7 @@ def git_header():
 def copy_func(f):
     """Copy a non-builtin function (NB `copy.copy` does not work for this)"""
     if not isinstance(f, FunctionType):
-        return copy(f)
+        return specially_imported_copy(f)
     fn = FunctionType(f.__code__, f.__globals__, f.__name__, f.__defaults__, f.__closure__)
     fn.__dict__.update(f.__dict__)
     return fn
@@ -249,6 +248,18 @@ def to_one_hot(lst):
 def normalize(lst):
     r = np.array(lst)
     return (r - r.min()) / (r.max() - r.min()), (r.min(), r.max())
+
+# Needed for things like latitude/longitude that can't be stored in small floats with good precision
+# Slower
+def normalize_high_precision(lst):
+    r = np.array(lst)
+    # mean = r.mean()
+    mi = r.min()
+    ma = r.max()
+    delta = ma-mi
+    new_lst = [(x-mi)/delta for x in lst]
+    return np.array(new_lst), (mi, ma)
+    # return (r - mi) / (ma - mi), (mi, ma)
 
 
 def denormalize(lst, mi, ma):
