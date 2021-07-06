@@ -42,6 +42,9 @@ except ImportError:
 def timestamp():
     return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
+def datestamp():
+    return datetime.datetime.now().strftime("%Y%m%d")
+
 
 def pprint(l, indent=0):
     if isinstance(l, list) or isinstance(l, tuple) or isinstance(l, set):
