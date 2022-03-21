@@ -12,14 +12,11 @@ git_header()
 margins_begone()
 
 """
-
-
-
-
+import datetime
 import functools
 import os
 import time
-from copy import copy
+from copy import copy as specially_imported_copy
 from types import FunctionType
 import random
 # import tensorflow as tf
@@ -44,6 +41,13 @@ try:
 except ImportError:
     # We may not be in a jupyter notebook
     pass
+
+
+def timestamp():
+    return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
+def datestamp():
+    return datetime.datetime.now().strftime("%Y%m%d")
 
 
 def pprint(l, indent=0):
@@ -110,7 +114,7 @@ def git_header():
 def copy_func(f):
     """Copy a non-builtin function (NB `copy.copy` does not work for this)"""
     if not isinstance(f, FunctionType):
-        return copy(f)
+        return specially_imported_copy(f)
     fn = FunctionType(f.__code__, f.__globals__, f.__name__, f.__defaults__, f.__closure__)
     fn.__dict__.update(f.__dict__)
     return fn
@@ -240,6 +244,41 @@ def margins_begone():
       </style>"""))
 
 
+def to_one_hot(lst):
+    values = dict()
+    ind = 0
+    for item in lst:
+        if item not in values.keys():
+            ind += 1
+            values[item] = ind
+    result = np.zeros((len(lst), ind+1))
+    for i, item in enumerate(lst):
+        result[i][values[item]]=1
+    return result, values
+
+
+def normalize(lst):
+    r = np.array(lst)
+    return (r - r.min()) / (r.max() - r.min()), (r.min(), r.max())
+
+# Needed for things like latitude/longitude that can't be stored in small floats with good precision
+# Slower
+def normalize_high_precision(lst):
+    r = np.array(lst)
+    # mean = r.mean()
+    mi = r.min()
+    ma = r.max()
+    delta = ma-mi
+    new_lst = [(x-mi)/delta for x in lst]
+    return np.array(new_lst), (mi, ma)
+    # return (r - mi) / (ma - mi), (mi, ma)
+
+
+def denormalize(lst, mi, ma):
+    r = np.array(lst)
+    return r*(ma-mi)+mi
+
+
 def imdisp(arr, rotate=False, zoom=(4, 4), palette=None):
     if isinstance(arr, torch.Tensor):
         arr = arr.detach().numpy()
@@ -336,3 +375,30 @@ def imrow(imglist, palette=None, zoom=(4,4)):
         fig.add_subplot(1, len(imglist), x+1)
         matplotlib.pyplot.imshow(img)
         matplotlib.pyplot.axis('off')
+
+
+class JsonUnrolled:
+    def __init__(self):
+        self.items = list()
+        pass
+
+    def __repr__(self):
+        return repr(self.items)
+
+
+def to_obj(d):
+    if type(d) is dict:
+        o = JsonUnrolled()
+        for k, v in d.items():
+            setattr(o, k, to_obj(v))
+            o.items.append(k)
+        return o
+    elif type(d) is list:
+        o = list()
+        for dd in d:
+            o.append(to_obj(dd))
+        return o
+    else:
+        return d
+
+
