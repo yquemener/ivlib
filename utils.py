@@ -1,5 +1,9 @@
 """
+I (Yves Quemener) am the only author of this software. If you are a client of my freelance activity (IV-devs)
+and this lib is used in one of the works I delivered to you, consider that you are free to
+use it under the same conditions as if it were public domain or CC-0, at your convenience.
 
+Otherwise, it is released to the public under the terms of the AGPL
 %load_ext autoreload
 %autoreload 2
 
@@ -128,6 +132,11 @@ def patch_to(cls, as_prop=False):
 
     return _inner
 
+from inspect import currentframe
+
+def get_linenumber():
+    cf = currentframe()
+    return cf.f_back.f_lineno
 
 def patch(f):
     """Decorator: add `f` to the first parameter's class (based on f's type annotations)"""
