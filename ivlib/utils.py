@@ -24,15 +24,13 @@ from PIL import Image
 import matplotlib.pyplot
 import base64
 from io import BytesIO
-
-
-from pygit2 import Repository, discover_repository
 import numpy as np
 from math import *
 from html import escape
 
 try:
     import torch
+    from pygit2 import Repository, discover_repository
 except ImportError:
     pass
 
