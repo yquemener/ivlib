@@ -4,11 +4,11 @@ and this lib is used in one of the works I delivered to you, consider that you a
 use it under the same conditions as if it were public domain or CC-0, at your convenience.
 
 Otherwise, it is released to the public under the terms of the AGPL
+
 %load_ext autoreload
 %autoreload 2
 
 from ivlib.utils import *
-git_header()
 margins_begone()
 
 """
@@ -242,6 +242,22 @@ def margins_begone():
       </style>"""))
 
 
+def remove_warnings():
+    from IPython.display import HTML
+    display(HTML('''
+    <style>
+        div.output_stderr { display:none; }
+    </style>
+    '''))
+
+def enable_warnings():
+    from IPython.display import HTML
+    display(HTML('''
+    <style>
+        div.output_stderr { display:inline; }
+    </style>
+    '''))
+
 def to_one_hot(lst):
     values = dict()
     ind = 0
@@ -278,8 +294,11 @@ def denormalize(lst, mi, ma):
 
 
 def imdisp(arr, rotate=False, zoom=(4, 4), palette=None):
-    if isinstance(arr, torch.Tensor):
-        arr = arr.detach().numpy()
+    try:
+        if isinstance(arr, torch.Tensor):
+            arr = arr.detach().numpy()
+    except NameError:
+        pass
     return display(get_img(arr, rotate, zoom, palette))
 
 
@@ -400,3 +419,16 @@ def to_obj(d):
         return d
 
 
+# Draw a circle
+def draw_circle(img, cx, cy, r):
+    xx, yy = np.mgrid[:img.shape[0], :img.shape[1]]
+    img[(xx - cx) ** 2 + (yy - cy) ** 2<r*r]=1
+
+
+# Draw a rectangle
+def draw_rectangle(img, x1,y1,x2,y2):
+    xx, yy = np.mgrid[:img.shape[0], :img.shape[1]]
+    img[np.logical_and(
+            np.logical_and(y1 <= yy, yy <= y2),
+            np.logical_and(x1 <= xx, xx <= x2))
+    ] = 1
