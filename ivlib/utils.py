@@ -5,8 +5,8 @@ use it under the same conditions as if it were public domain or CC-0, at your co
 
 Otherwise, it is released to the public under the terms of the AGPL
 
-%load_ext autoreload
-%autoreload 2
+    %load_ext autoreload
+    %autoreload 2
 
 from ivlib.utils import *
 margins_begone()
@@ -27,6 +27,10 @@ from io import BytesIO
 import numpy as np
 from math import *
 from html import escape
+import io
+import base64
+
+
 
 try:
     import torch
@@ -432,3 +436,15 @@ def draw_rectangle(img, x1,y1,x2,y2):
             np.logical_and(y1 <= yy, yy <= y2),
             np.logical_and(x1 <= xx, xx <= x2))
     ] = 1
+
+
+
+def img_row(images):
+    s=""
+    for img in images:
+        rawBytes = io.BytesIO()
+        Image.fromarray(img.astype("uint8")).save(rawBytes, "PNG")
+        rawBytes.seek(0)  # return to the start of the file
+        bs=base64.b64encode(rawBytes.read())
+        s+= f'<img src="data:image/png;base64,{bs.decode("ascii")}" style="display:inline;margin:1px"/>'
+    display(HTML(s))
