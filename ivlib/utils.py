@@ -29,7 +29,7 @@ from math import *
 from html import escape
 import io
 import base64
-
+from skimage.draw import line_aa
 
 
 try:
@@ -437,9 +437,16 @@ def draw_rectangle(img, x1,y1,x2,y2):
             np.logical_and(x1 <= xx, xx <= x2))
     ] = 1
 
+# Draws an AA line
+def line(img, x1, y1, x2, y2, color):
+    rr, cc, val = line_aa(y1, x1, y2, x2)
+    img[rr, cc, 0] = val * color[0]
+    img[rr, cc, 1] = val * color[1]
+    img[rr, cc, 2] = val * color[2]
+    return img
 
 
-def img_row(images):
+def img_row(*images):
     s=""
     for img in images:
         rawBytes = io.BytesIO()
@@ -448,3 +455,15 @@ def img_row(images):
         bs=base64.b64encode(rawBytes.read())
         s+= f'<img src="data:image/png;base64,{bs.decode("ascii")}" style="display:inline;margin:1px"/>'
     display(HTML(s))
+
+
+def colormap8():
+    cmap = (np.random.random((256, 3)) * 192 + 63).astype(np.uint8)
+    cmap[0] = [0, 0, 0]
+    return cmap
+
+
+def colormap16():
+    cmap = (np.random.random((65536, 3)) * 192 + 63).astype(np.uint8)
+    cmap[0] = [0, 0, 0]
+    return cmap
