@@ -446,14 +446,22 @@ def line(img, x1, y1, x2, y2, color):
     return img
 
 
-def img_row(*images):
-    s=""
-    for img in images:
+def img_row(*images, labels=None):
+    s="<div style='width:100%'>"
+    for i,img in enumerate(images):
         rawBytes = io.BytesIO()
         Image.fromarray(img.astype("uint8")).save(rawBytes, "PNG")
         rawBytes.seek(0)  # return to the start of the file
         bs=base64.b64encode(rawBytes.read())
-        s+= f'<img src="data:image/png;base64,{bs.decode("ascii")}" style="display:inline;margin:1px"/>'
+        s+= f'''<div style="display:block;">
+                    <div style="float:left;">
+                        <img src="data:image/png;base64,{bs.decode("ascii")}" style="display:inline;margin:1px"/>
+                        </br>'''
+        if labels:
+            s+=f'       <div style="display:inline;">{labels[i]}</div>'
+        s+= '''     </div>
+                </div>'''
+    s+="</div>"
     display(HTML(s))
 
 
