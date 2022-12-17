@@ -475,3 +475,10 @@ def colormap16():
     cmap = (np.random.random((65536, 3)) * 192 + 63).astype(np.uint8)
     cmap[0] = [0, 0, 0]
     return cmap
+
+# Convenient short hand for a visualization function
+def display_img(img):
+    if img.dtype is np.dtype(bool):
+        display(Image.fromarray((img*255).astype(np.uint8)))
+    else:
+        display(Image.fromarray(img.astype(np.uint8)))
